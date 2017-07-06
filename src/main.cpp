@@ -110,7 +110,7 @@ int main() {
             x_waypoint[i] = tran_x * cos(-psi) - tran_y * sin(-psi);
             y_waypoint[i] = tran_x * sin(-psi) + tran_y * cos(-psi);
           }
-          
+
 
           // Fit the cubic polynomial to the points.
           Eigen::VectorXd fit_coeff = polyfit(x_waypoint, y_waypoint, 3);
@@ -163,8 +163,16 @@ int main() {
           msgJson["mpc_y"] = mpc.pred_y;
 
           //Display the waypoints/reference line
-          msgJson["next_x"] = ptsx;
-          msgJson["next_y"] = ptsy;
+          vector<double> display_x;
+          vector<double> display_y;
+
+          for(int i = 0; i < x_waypoint.size(); i++){
+            display_x.push_back(x_waypoint[i]);
+            display_y.push_back(y_waypoint[i]);
+          }
+
+          msgJson["next_x"] = display_x;
+          msgJson["next_y"] = display_y;
 
 
 
