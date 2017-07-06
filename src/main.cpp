@@ -85,6 +85,7 @@ int main() {
         string event = j[0].get<string>();
         if (event == "telemetry") {
           // j[1] is the data JSON object
+          // get the current state 
           vector<double> ptsx = j[1]["ptsx"];
           vector<double> ptsy = j[1]["ptsy"];
           double px = j[1]["x"];
@@ -92,40 +93,78 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
-          /*
-          * TODO: Calculate steering angle and throttle using MPC.
-          *
-          * Both are in between [-1, 1].
-          *
-          */
-          double steer_value;
-          double throttle_value;
+          double throttle = j[1]["throttle"];
+          double steering_angle = j[1]["steering_angle"];
 
+
+          // Calcuate the crosstrack error (cte) and the heading error (epsi).
+
+          // Copy over the elements of the vector<double> objects into VectorXd objects.
+          Eigen::VectorXd x_waypoint(ptsx.size());
+          Eigen::VectorXd y_waypoint(ptsy.size());
+          // transform waypoint to vehicle coorinates
+          for (int i=0; i<ptsx.size(); i++) {
+            double tran_x = ptsx[i] - px;
+            double tran_y = ptsy[i] - py;
+
+            x_waypoint[i] = tran_x * cos(-psi) - tran_y * sin(-psi);
+            y_waypoint[i] = tran_x * sin(-psi) + tran_y * cos(-psi);
+          }
+
+
+          // Fit the cubic polynomial to the points.
+          Eigen::VectorXd fit_coeff = polyfit(x_waypoint, y_waypoint, 3);
+
+          // Now, evaluate the cross track error (cte) relative to this fit cubic polynomial.
+          double cte = polyeval(fit_coeff, 0);
+          std::cout << "Crosstrack Error (CTE) = " << cte << " [m] " << std::endl;
+
+          double epsi = psi - atan(fit_coeff[1]);          
+     
+          double current_dt = 0.1; // 100 ms
+          double Lf = 2.67;
+
+
+          double current_x = v * current_dt;
+          double current_y = 0;
+          double current_psi = -(v / Lf) * steering_angle * current_dt;
+          double current_v = v + throttle * current_dt;
+          double current_cte = cte + v * sin(epsi) * current_dt;
+
+          // Compute the expected psi based on fit.
+          double expected_psi = atan(fit_coeff[1] + 
+                                2.0 * fit_coeff[2] * current_x + 
+                                3.0 * fit_coeff[3] * current_x * current_x);
+
+          // Compute the psi error.
+          double current_epsi = psi - expected_psi;
+          
+          // Save into state vector for Solve to use
+          Eigen::VectorXd state(6); // State has 6 elements
+          state << current_x, current_y, current_psi, current_v, current_cte, current_epsi;
+
+
+          // Solve for the steering angle and acceleration solution.
+          vector<double> solution = mpc.Solve(state, fit_coeff);
+
+          // Assign the solution outputs steering and throttle
+          double steer_value = solution[0];
+          double throttle_value = solution[1];
+
+          // Package the JSON payload for transmission to the simulator.
           json msgJson;
-          // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
-          // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
 
           //Display the MPC predicted trajectory 
-          vector<double> mpc_x_vals;
-          vector<double> mpc_y_vals;
-
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Green line
-
-          msgJson["mpc_x"] = mpc_x_vals;
-          msgJson["mpc_y"] = mpc_y_vals;
+          msgJson["mpc_x"] = mpc.pred_x;
+          msgJson["mpc_y"] = mpc.pred_y;
 
           //Display the waypoints/reference line
-          vector<double> next_x_vals;
-          vector<double> next_y_vals;
+          msgJson["next_x"] = ptsx;
+          msgJson["next_y"] = ptsy;
 
-          //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
-          // the points in the simulator are connected by a Yellow line
 
-          msgJson["next_x"] = next_x_vals;
-          msgJson["next_y"] = next_y_vals;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
