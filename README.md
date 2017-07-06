@@ -68,10 +68,13 @@ const size_t N = 9;  // when N is greater then 10, at same turn, it show a non s
 					 // cause by calculate time is not enough, if set N =15, it will show up more time. 
 const double dt = 0.1;
 ```
-#### I try with different number for N, and I end up with N = 9. the reason for 9 is beacuse it is the maximum number that is smooth curvy line. If the number is increase to 10, on one of the turn, the prediction line will lead to the outside of the track for a second. If the number is increase more, it will show up more place and more time. The reason for that is cause by calculate time too long, not finish the calculation before the next input. That is also the reason to choose dt = 0.1, is dt is smaller, the N value need to decrease to let the calculation finish in time. On the other hand, we do not want ot increase the dt too much just for the calculation, because that will shorter the reaction time for the curve. This is trade off between the computation time and the number we can predict of the future. 
+#### I try with different number for N, and I end up with N = 9. the reason for 9 is beacuse it is the maximum number that is smooth curvy line. If the number is increase to 10, on one of the turn, the prediction line will lead to the outside of the track for a second. Like this:
+![MPC](https://github.com/gon1213/MPC_control/blob/master/image/wrong_line.png)
+#### If the number is increase more, it will show up more place and more time. The reason for that is cause by calculate time too long, not finish the calculation before the next input. That is also the reason to choose dt = 0.1, is dt is smaller, the N value need to decrease to let the calculation finish in time. On the other hand, we do not want ot increase the dt too much just for the calculation, because that will shorter the reaction time for the curve. This is trade off between the computation time and the number we can predict of the future. 
 
 ## Prediction
 #### For the prediction, I implement the ipopt to calculate the the best line respected to the penalty weight and return the minimize the cost. And produce The prediction line as green in the following image.
 
-![MPC](https://github.com/gon1213/MPC_control/blob/master/green_line.png)
+![MPC](https://github.com/gon1213/MPC_control/blob/master/image/correct.png)
+
 
