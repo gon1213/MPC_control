@@ -7,7 +7,8 @@
 using namespace std;
 
 // TODO: Set the timestep length and duration
-const size_t N = 9;
+const size_t N = 9;  // when N is greater then 10, at same turn, it show a non smooth line.
+					 // cause by calculate time is not enough, if set N =15, it will show up more time. 
 const double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.

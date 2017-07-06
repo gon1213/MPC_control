@@ -110,7 +110,7 @@ int main() {
             x_waypoint[i] = tran_x * cos(-psi) - tran_y * sin(-psi);
             y_waypoint[i] = tran_x * sin(-psi) + tran_y * cos(-psi);
           }
-
+          
 
           // Fit the cubic polynomial to the points.
           Eigen::VectorXd fit_coeff = polyfit(x_waypoint, y_waypoint, 3);
@@ -119,7 +119,9 @@ int main() {
           double cte = polyeval(fit_coeff, 0);
           std::cout << "Crosstrack Error (CTE) = " << cte << " [m] " << std::endl;
 
-          double epsi = psi - atan(fit_coeff[1]);          
+          double epsi = psi - atan(fit_coeff[1]);
+          
+          
      
           double current_dt = 0.1; // 100 ms
           double Lf = 2.67;
