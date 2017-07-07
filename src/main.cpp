@@ -157,7 +157,7 @@ int main() {
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = throttle_value;
-
+          throttle_value = throttle_value / deg2rad(25);
           //Display the MPC predicted trajectory 
           msgJson["mpc_x"] = mpc.pred_x;
           msgJson["mpc_y"] = mpc.pred_y;

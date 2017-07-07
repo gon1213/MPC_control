@@ -23,7 +23,7 @@ const double dt = 0.1;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-const double ref_v = 55;
+const double ref_v = 80;
 
 
 
@@ -43,7 +43,7 @@ const double w_v = 1.0;
 const double w_delta = 3000;
 const double w_a = 10;
 const double w_diff_delta = 5000;
-const double w_diff_a = 10000;
+const double w_diff_a = 7000;
 
 class MPC {
  public:
